@@ -1,0 +1,4 @@
+a 0 -> a 1 right
+a 1 -> a 2 right
+a 2 -> a 3 left
+a 3 -> a 0 left
