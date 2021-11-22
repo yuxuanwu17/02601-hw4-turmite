@@ -39,8 +39,8 @@ type Action struct {
 }
 
 type Turmite struct {
-	rules      map[Signal]Action
-	x, y       int
+	rules      map[Signal]Action // rules store the rules stored in the mite file, once read, retain all the time in this object
+	x, y       int               // position
 	currentDir Direction
 	state      State
 }
@@ -57,7 +57,7 @@ func NewField(size int) Field {
 }
 
 // DrawField draws the field to a PNG in the given filename. Assumes that
-// field[y][x] is at the cell (y,x), where the origin is at the top-right
+// field[y][x] is at the cell (y,x), where the origin is in the top-right
 // corner.
 func (f Field) DrawField(filename string) {
 	const scale = 5
@@ -132,7 +132,8 @@ func ReadTurmite(filename string, size int) (*Turmite, error) {
 		return nil, err
 	}
 	defer file.Close()
-	
+
+	// the initial state, center, half x and half y, facing north
 	tur := Turmite{
 		x:          size / 2,
 		y:          size / 2,
@@ -152,6 +153,7 @@ func ReadTurmite(filename string, size int) (*Turmite, error) {
 		var dirString string
 		var state_in_char, state_out_char rune
 
+		// scan the argument string, storing successive space-separated values into successive arguments as determined by the format
 		n, err := fmt.Sscanf(line, "%c %d -> %c %d %s",
 			&state_in_char,
 			&color_in,
@@ -167,6 +169,8 @@ func ReadTurmite(filename string, size int) (*Turmite, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		// read the rules from mite file and attach it to the rules in this mite object
 		tur.rules[Signal{state: state_in, color: color_in}] = Action{
 			state: state_out,
 			color: color_out,
@@ -180,8 +184,32 @@ func ReadTurmite(filename string, size int) (*Turmite, error) {
 // Step moves the turmite one step using the given field. Return an error if the
 // turmite gets stuck with no rule to apply.
 func (t *Turmite) Step(field Field) error {
+	// field is the input,which would store the board
 
-	// FILL IN THIS FUNCTION
+	// sense the color and find the suitable rules ==> obtain the signal based on the current location
+	currState := t.state
+	currColor := field[t.x][t.y]
+
+	currSignal := Signal{
+		state: currState,
+		color: currColor,
+	}
+
+	// find the rules based on the signal
+	nextAction := t.rules[currSignal]
+
+	// set its state to a new value in a...z.
+	t.state = nextAction.state
+
+	// change the color of the square that it is on to some color
+	field[t.x][t.y] = nextAction.color
+
+	// Turn degrees relative to the direction it is facing
+	t.currentDir = nextAction.turn
+
+	// Walk one step in the direction it is facing
+	// 朝着t.currentDir 的方向，已经更新过的方向前进1step 问题是1step的方向，落实到格子上需要研究
+
 	return nil
 }
 
@@ -189,7 +217,7 @@ func main() {
 	var program, pngfile string
 	var fieldSize, iters int
 
-	flag.StringVar(&program, "prog", "spiral", "File containing the turmite program")
+	flag.StringVar(&program, "prog", "zip.mite", "File containing the turmite program")
 	flag.IntVar(&fieldSize, "s", 100, "Size of the field")
 	flag.IntVar(&iters, "steps", 100, "Number of steps")
 	flag.StringVar(&pngfile, "o", "output.png", "Filename to draw output")
