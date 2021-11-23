@@ -208,8 +208,22 @@ func (t *Turmite) Step(field Field) error {
 	t.currentDir = nextAction.turn
 
 	// Walk one step in the direction it is facing
-	// 朝着t.currentDir 的方向，已经更新过的方向前进1step 问题是1step的方向，落实到格子上需要研究
-
+	/*
+		(if forward the direction stays the same;
+		if backward the Turmite turns 180 degrees; if left or right the Turmite turns 90 degrees in that
+		direction) and then moves one cell in that direction
+	*/
+	if t.currentDir == ForwardDir {
+		t.y = t.y - 1
+	} else if t.currentDir == RightDir {
+		t.x = t.x + 1
+	} else if t.currentDir == BackwardDir {
+		t.y = t.y + 1
+	} else if t.currentDir == LeftDir {
+		t.x = t.x - 1
+	} else {
+		fmt.Println("Error occurred")
+	}
 	return nil
 }
 
@@ -232,11 +246,14 @@ func main() {
 		log.Fatal(err)
 	}
 	field := NewField(fieldSize)
+	//count :=0
 	for i := 0; i < iters; i++ {
 		err := mite.Step(field)
 		if err != nil {
 			log.Fatal(err)
 		}
+		//count++
+		//fmt.Println(count)
 	}
 	field.DrawField(pngfile)
 }
