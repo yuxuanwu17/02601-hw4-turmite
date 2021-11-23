@@ -1,3 +1,20 @@
 1000 15000 zip
 1000 15000 spiral
 
+a 0 -> a 1 right
+a 1 -> b 0 forward
+b 0 -> a 0 left
+b 1 -> a 1 left
+
+
+a 0 -> a 1 right
+a 1 -> b 0 forward
+b 0 -> a 2 backward
+b 1 -> a 1 left
+
+a 0 -> a 1 right
+a 1 -> b 0 forward
+b 0 -> a 2 backward
+b 1 -> a 1 left
+b 1 -> a 3 backward
+a 1 -> b 5 forward

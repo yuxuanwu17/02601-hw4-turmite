@@ -291,10 +291,10 @@ func main() {
 	var program, pngfile string
 	var fieldSize, iters int
 
-	flag.StringVar(&program, "prog", "example1.mite", "File containing the turmite program")
-	flag.IntVar(&fieldSize, "s", 100, "Size of the field")
+	flag.StringVar(&program, "prog", "coolest.mite", "File containing the turmite program")
+	flag.IntVar(&fieldSize, "s", 150, "Size of the field")
 	flag.IntVar(&iters, "steps", 100000, "Number of steps")
-	flag.StringVar(&pngfile, "o", "output.png", "Filename to draw output")
+	flag.StringVar(&pngfile, "o", "coolest.png", "Filename to draw output")
 	flag.Parse()
 
 	if program == "" {
