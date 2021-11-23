@@ -43,6 +43,7 @@ type Turmite struct {
 	x, y       int               // position
 	currentDir Direction
 	state      State
+	face       string
 }
 
 type Field [][]ColorID
@@ -66,7 +67,7 @@ func (f Field) DrawField(filename string) {
 
 	for x := 0; x < n; x++ {
 		for y := 0; y < n; y++ {
-			out.SetFillColor(f[y][x].ToColor())
+			out.SetFillColor(f[x][y].ToColor())
 			out.ClearRect(x*scale, y*scale, (x+1)*scale, (y+1)*scale)
 		}
 	}
@@ -140,6 +141,7 @@ func ReadTurmite(filename string, size int) (*Turmite, error) {
 		currentDir: NorthDir,
 		state:      0,
 		rules:      make(map[Signal]Action),
+		face:       "North",
 	}
 
 	scanner := bufio.NewScanner(file)
@@ -205,21 +207,31 @@ func (t *Turmite) Step(field Field) error {
 	field[t.x][t.y] = nextAction.color
 
 	// Turn degrees relative to the direction it is facing
-	t.currentDir = nextAction.turn
+	degrees := nextAction.turn
+
+	// obtain the existing direction
+	currFace := t.face
+
+	switch currFace {
+	case "North":
+		t.NorthMove(degrees)
+	case "South":
+		t.SouthMove(degrees)
+	case "East":
+		t.EastMove(degrees)
+	case "West":
+		t.WestMove(degrees)
+	}
+	//t.currentDir = nextAction.turn
 
 	// Walk one step in the direction it is facing
-	/*
-		(if forward the direction stays the same;
-		if backward the Turmite turns 180 degrees; if left or right the Turmite turns 90 degrees in that
-		direction) and then moves one cell in that direction
-	*/
-	if t.currentDir == ForwardDir {
+	if t.face == "North" {
 		t.y = t.y - 1
-	} else if t.currentDir == RightDir {
+	} else if t.face == "East" {
 		t.x = t.x + 1
-	} else if t.currentDir == BackwardDir {
+	} else if t.face == "South" {
 		t.y = t.y + 1
-	} else if t.currentDir == LeftDir {
+	} else if t.face == "West" {
 		t.x = t.x - 1
 	} else {
 		fmt.Println("Error occurred")
@@ -227,13 +239,61 @@ func (t *Turmite) Step(field Field) error {
 	return nil
 }
 
+func (t *Turmite) NorthMove(degrees Direction) {
+	if degrees == 0 {
+		t.face = "North"
+	} else if degrees == 1 {
+		t.face = "East"
+	} else if degrees == 2 {
+		t.face = "South"
+	} else {
+		t.face = "West"
+	}
+
+}
+func (t *Turmite) SouthMove(degrees Direction) {
+	if degrees == 0 {
+		t.face = "South"
+	} else if degrees == 1 {
+		t.face = "West"
+	} else if degrees == 2 {
+		t.face = "North"
+	} else {
+		t.face = "East"
+	}
+}
+func (t *Turmite) EastMove(degrees Direction) {
+
+	if degrees == 0 {
+		t.face = "East"
+	} else if degrees == 1 {
+		t.face = "South"
+	} else if degrees == 2 {
+		t.face = "West"
+	} else {
+		t.face = "North"
+	}
+}
+func (t *Turmite) WestMove(degrees Direction) {
+
+	if degrees == 0 {
+		t.face = "West"
+	} else if degrees == 1 {
+		t.face = "North"
+	} else if degrees == 2 {
+		t.face = "East"
+	} else {
+		t.face = "South"
+	}
+}
+
 func main() {
 	var program, pngfile string
 	var fieldSize, iters int
 
-	flag.StringVar(&program, "prog", "zip.mite", "File containing the turmite program")
+	flag.StringVar(&program, "prog", "example1.mite", "File containing the turmite program")
 	flag.IntVar(&fieldSize, "s", 100, "Size of the field")
-	flag.IntVar(&iters, "steps", 100, "Number of steps")
+	flag.IntVar(&iters, "steps", 100000, "Number of steps")
 	flag.StringVar(&pngfile, "o", "output.png", "Filename to draw output")
 	flag.Parse()
 
